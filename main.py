@@ -14,8 +14,8 @@ from zhdate import ZhDate
 # 墨水屏共 5 页：1=热搜上, 2=热搜下, 3=日历, 4=天气
 ENABLED_PAGES = "1,2,3,4"
 
-# 2. 热搜源设置：目前支持 'zhihu', 'bilibili', 'github'
-HOTLIST_SOURCE = "zhihu"  # 在这里修改你想看的热搜源
+# 2. 热搜源设置：目前支持 'zhihu', 'bilibili', 'github'，'toutiao'
+HOTLIST_SOURCE = "toutiao"  # 在这里修改你想看的热搜源
 
 # 3. 天气城市设置
 # 高德天气城市代码（默认：天津市津南区 120112，北京是 110000，合肥市蜀山区340104）
@@ -26,7 +26,7 @@ WTTR_LOCATION = "Hefei,Anhui"
 
 # 4. 屏幕显示文字
 # 天气页面左上角的自定义标题，你可以改成 "北京市 | 我的温馨小窝" 等等
-CITY_DISPLAY_NAME = "合肥 | 我家"      
+CITY_DISPLAY_NAME = "合肥 | 我滴家"      
 
 
 # =====================================================================
@@ -167,6 +167,10 @@ def get_hotlist_data(source):
             url = f"https://api.github.com/search/repositories?q=stars:>500+created:>{date_str}&sort=stars&order=desc"
             res = requests.get(url, headers=HEADERS, timeout=10).json()
             titles = [f"{item['full_name']}: {item['description'][:50] if item['description'] else 'No desc'}" for item in res['items']]
+        elif source == "toutiao":
+            url = "https://newsnow.busiyi.world/api/s?id=toutiao"
+            res = requests.get(url, headers=HEADERS, timeout=10).json()
+            titles = [item['title'] for item in res['items']]
         else:
             titles = ["不支持的数据源"]
     except Exception as e:
@@ -180,7 +184,7 @@ def task_hotlist():
     if "1" not in ENABLED_PAGES and "2" not in ENABLED_PAGES:
         return
         
-    source_map = {"zhihu": "知乎热榜", "bilibili": "B站热搜", "github": "GitHub 热门"}
+    source_map = {"zhihu": "知乎热榜", "bilibili": "B站热搜", "github": "GitHub 热门","toutiao":"今日头条"}
     titles = get_hotlist_data(HOTLIST_SOURCE)
     title_display = source_map.get(HOTLIST_SOURCE, "热门看板")
 
